@@ -89,13 +89,20 @@ export async function POST(req: NextRequest) {
     .single()
 
   // Send notifications (non-blocking)
+  console.log('Notification attempt - business found:', !!business, 'RESEND_API_KEY set:', !!process.env.RESEND_API_KEY)
   if (business) {
     sendBookingNotifications({
       booking,
       business,
       service: serviceCheck.data as any,
       staff: staffCheck.data as any,
-    }).catch(console.error)
+    }).then(() => {
+      console.log('Notifications sent successfully')
+    }).catch(err => {
+      console.error('Notification error:', err)
+    })
+  } else {
+    console.error('Business not found for notifications, business_id:', business_id)
   }
 
   return NextResponse.json({
